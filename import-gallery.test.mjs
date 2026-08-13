@@ -78,6 +78,20 @@ test("skips duplicates inside the incoming folder itself", async () => {
   assert.equal(result.skippedDuplicateBytes, 1);
 });
 
+test("ignores the AppleDouble sidecars a macOS zip carries", async () => {
+  // A zip made on a Mac holds __MACOSX/._<file>.pxc metadata twins. They are not wallpapers.
+  const dirs = await scratch();
+  await mkdir(path.join(dirs.sourceDir, "__MACOSX"));
+  await writeFile(path.join(dirs.sourceDir, "__MACOSX", "._art.pxc"), Buffer.from([0, 5, 22, 7]));
+  await writeFile(path.join(dirs.sourceDir, "._art.pxc"), Buffer.from([0, 5, 22, 7]));
+  await writeFile(path.join(dirs.sourceDir, "art.pxc"), rings(528, 792));
+
+  const result = await run(dirs);
+  assert.equal(result.sourceFiles, 1);
+  assert.equal(result.added, 1);
+  assert.deepEqual(result.rejected, []);
+});
+
 test("skips the same picture stored at the other device size", async () => {
   // Different dimensions and different bytes, so only the look pass can catch this.
   const dirs = await scratch();

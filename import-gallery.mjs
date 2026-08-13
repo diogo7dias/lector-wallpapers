@@ -39,6 +39,10 @@ async function findPxcFiles(dir) {
   const found = [];
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     const fullPath = path.join(dir, entry.name);
+    // A zip made on macOS carries a __MACOSX tree of AppleDouble sidecars named "._<file>".
+    // They end in .pxc but hold resource-fork metadata, so every one would be reported as a
+    // broken wallpaper. Skip them by name, at both levels.
+    if (entry.name === "__MACOSX" || entry.name.startsWith("._")) continue;
     if (entry.isDirectory()) found.push(...await findPxcFiles(fullPath));
     else if (entry.isFile() && entry.name.toLowerCase().endsWith(".pxc")) found.push(fullPath);
   }
