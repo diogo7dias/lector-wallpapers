@@ -21,3 +21,17 @@ matched two ways, both ignoring filenames:
 
 Broken or wrongly sized files are reported and left out rather than stopping the run. Use
 `--dry-run` first to see the counts without writing anything.
+
+## The one-file download
+
+The site's Gallery tab offers the whole set as a single zip. It is not committed here: at ~176 MB
+it would sit in the git history and in every Pages deploy. It is built and attached to a release
+instead, which is what the site links to.
+
+```
+node build-gallery-zip.mjs
+gh release upload gallery-latest lector-wallpapers-gallery.zip --clobber
+```
+
+Rebuild and re-upload after every import, so the archive matches `gallery/`. The `gallery-latest`
+tag and the asset name never change, so the site's link keeps working untouched.
